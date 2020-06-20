@@ -1,0 +1,3 @@
+rootProject.name='JniDemoTest'
+include ':app'
+include ':serialport'

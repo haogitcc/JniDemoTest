@@ -1,0 +1,61 @@
+apply plugin: 'java-library'
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+}
+
+sourceCompatibility = "7"
+targetCompatibility = "7"
+
+//def _BASENAME = "SerialPort";
+//def _VERSION = "_V1.0";
+//def _DestinationPath = "build"; //生成jar包的位置
+//def zipFile = file('build/intermediates/bundles/default/classes.jar'); //待打包文件位置
+//
+//task deleteBuild(type:Delete){
+//    delete _DestinationPath + _BASENAME + _VERSION + ".jar"
+//}
+//
+//task makeJar(type:Jar){
+//    from zipTree(zipFile)
+//    from fileTree(dir:'src/main',includes:['assets/**']) //将assets目录打入jar包
+//    baseName = _BASENAME + _VERSION
+//    destinationDir = file(_DestinationPath)
+//}
+//
+//makeJar.dependsOn(deleteBuild, build)
+
+//task clearJar(type: Delete) {
+//    delete 'build/SerialPort.jar' //jar包的名字，随便命名
+//}
+//task makeJar(type: Copy) {
+//    //指定生成的jar名
+//    baseName 'SerialPort'
+//    //从哪里打包class文件
+//    from('build/classes/java/main/com/serialport')
+////    from('build/intermediates/bundles/default/')
+//    //打包到jar后的目录结构
+//    into('build/')
+//    //去掉不需要打包的目录和文件
+////    exclude('test/', 'BuildConfig.class', 'R.class')
+//    //去掉R开头的文件
+////    exclude{it.name.startsWith('R');}
+//}
+//makeJar.dependsOn(clearJar, build)
+
+//该task用来打包jar包
+task makeJar(type: Copy) {
+    //删除已经存在的jar包
+    delete 'build/libs/SerialPort.jar'
+    //从该目录下加载要打包的文件，注意这个目录，不同版本的AndroidStudio是不一样的，比如在3.0版本是build/intermediates/bundles/release/，要自己去查一下。
+//    from('build/intermediates/packaged-classes/release/')
+    from('build/intermediates/bundles/default/')
+    //jar包的保存目录
+    into('build/libs/')
+    //设置过滤，只打包classes文件
+    include('classes.jar')
+    //重命名，XXX.jar 根据自己的需求设置
+    rename('classes.jar', 'SerialPort.jar')
+}
+makeJar.dependsOn(build)
