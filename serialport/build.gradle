@@ -42,7 +42,6 @@ targetCompatibility = "7"
 //    //去掉R开头的文件
 ////    exclude{it.name.startsWith('R');}
 //}
-//makeJar.dependsOn(clearJar, build)
 
 //该task用来打包jar包
 task makeJar(type: Copy) {

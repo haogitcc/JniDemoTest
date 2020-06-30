@@ -1,7 +1,6 @@
 package com.serialport;
 
 import java.io.File;
-import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,18 +10,39 @@ public class SerialPort implements SerialTransport{
     private static final String TAG = "SerialPort";
 
     private boolean opened=false;
-    FileDescriptor mFd;
-    private String deviceName;
-    private int baudrate;
 
     public SerialPort()
     {
+        if(opened)
+            return;
+    }
 
+    public SerialPort(String deviceName)
+    {
+        if(opened)
+            return;
+        try {
+            openPb(deviceName);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public SerialPort(String deviceName, int baudrate)
     {
+        try {
+            open(deviceName, baudrate);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
+    private void openPb(String port) throws Exception {
+        if (-1 == nativeOpenPb(port))
+        {
+            throw new Exception("Couldn't open device");
+        }
+        opened = true;
     }
 
     @Override
@@ -60,32 +80,35 @@ public class SerialPort implements SerialTransport{
         return nativeGetBaudRate();
     }
 
-    public void sendBytes(int length, byte[] message, int offset, int timeoutMs) throws Exception {
-        int ret;
-
-        ret = nativeSendBytes(length, message, offset, timeoutMs);
-        if (0 != ret)
-        {
-            throw new Exception("Serial error");
-        }
+    public int Send(byte[] data)
+    {
+        int sendLen;
+        sendLen = nativeSendBytes(data.length, data, 0, 10);
+        System.err.println("SerialPort: Send " + sendLen);
+        return sendLen;
     }
 
-
-    public byte[] receiveBytes(int length, byte[] messageSpace, int offset, int timeoutMs)
+    public int Recv(byte[] recvBuf)
     {
-        int ret;
+        int recvLen;
+        recvLen = nativeReceiveBytes(recvBuf.length, recvBuf, 0, 10);
+        if(recvLen > 0)
+            System.err.println("SerialPort: Recv " + recvLen);
+        return recvLen;
+    }
 
-        if (messageSpace == null)
-        {
-            messageSpace = new byte[length + offset];
-        }
+    public void startReading(ReadListener readListener)
+    {
+        nativeAddReadListener(readListener);
+    }
 
-        ret = nativeReceiveBytes(length, messageSpace, offset, timeoutMs);
-
-        return messageSpace;
+    public void stopReading()
+    {
+        nativeRemoveReadListener();
     }
 
     // JNI
+    private native int nativeOpenPb(String port);
     private native int nativeOpen(String port, int baudrate);
     private native int nativeSendBytes(int length, byte[] message, int offset, int timeoutMs);
     private native int nativeReceiveBytes(int length, byte[] message, int offset, int timeoutMs);
@@ -93,11 +116,16 @@ public class SerialPort implements SerialTransport{
     private native int nativeGetBaudRate();
     private native int nativeClose();
     private native int nativeFlush();
+    private static native void nativeAddReadListener(ReadListener readListener);
+    private static native void nativeRemoveReadListener();
     static {
         System.loadLibrary("nativeSerial");
 //        load();
     }
 
+    /**
+     * Todo: for load lib in jar
+     */
     private static void load()
     {
         String libname ="";

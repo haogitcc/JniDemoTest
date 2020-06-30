@@ -4,34 +4,31 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 
+import com.serialport.ReadCallback;
+import com.serialport.ReadListener;
 import com.serialport.SerialPort;
-
 
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
-
+    SerialPort serialPort;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        serialPort = new SerialPort("/dev/ttyACM0", 115200);
+
+        serialPort.startReading(new ReadListener() {
+            @Override
+            public void onDataReceive(ReadCallback read) {
+                Log.d(TAG, "onDataReceive: " + read.strMsg);
+            }
+        });
     }
 
-    public void test(View view) {
-
-        SerialPort serialPort = new SerialPort();
-        try {
-            serialPort.open("/dev/ttyACM0", 115200);
-            Log.d(TAG, "test: connect success");
-
-//            serialPort.sendBytes();
-            
-            serialPort.close();
-            Log.d(TAG, "test: close success");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        serialPort.stopReading();
     }
 }

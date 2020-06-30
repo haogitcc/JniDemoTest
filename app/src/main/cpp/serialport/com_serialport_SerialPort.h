@@ -8,6 +8,8 @@
 extern "C" {
 #endif
 
+JNIEXPORT jint JNICALL Java_com_serialport_SerialPort_nativeOpenPb
+        (JNIEnv *, jobject, jstring);
 /*
  * Class:     com_serialport_SerialPort
  * Method:    nativeOpen
@@ -63,6 +65,13 @@ JNIEXPORT jint JNICALL Java_com_serialport_SerialPort_nativeClose
  */
 JNIEXPORT jint JNICALL Java_com_serialport_SerialPort_nativeFlush
   (JNIEnv *, jobject);
+
+JNIEXPORT void JNICALL
+Java_com_serialport_SerialPort_nativeAddReadListener(JNIEnv *env, jobject thiz,
+                                                     jobject read_listener);
+
+JNIEXPORT void JNICALL
+Java_com_serialport_SerialPort_nativeRemoveReadListener(JNIEnv *env, jobject thiz);
 
 #ifdef __cplusplus
 }
